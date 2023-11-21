@@ -98,7 +98,7 @@ for (path_temp in List_target_path) {
   }
   List_bam_files = paste("\'",List_bam_files,"\'",sep = "")
   
-  command_merge = base::paste("samtools merge ",List_target_path,"/Reads_to_demultiplex.bam -f ",paste(List_bam_files,collapse = " "),sep="")
+  command_merge = base::paste("conda run -n py39 samtools merge ",List_target_path,"/Reads_to_demultiplex.bam -f ",paste(List_bam_files,collapse = " "),sep="")
   system(command_merge)
   
   #Assigning reads to transcripts using Rsubread Featurecounts
@@ -107,10 +107,10 @@ for (path_temp in List_target_path) {
                     reportReads = "BAM",reportReadsPath = List_target_path,verbose = F,primaryOnly = T,allowMultiOverlap = T))
   
   #We now have to order and index the BAM file
- command_sort =paste("samtools sort ",List_target_path,"/Reads_to_demultiplex.bam.featureCounts.bam -o ",List_target_path,"/Assigned_sorted.bam",sep = "")
+ command_sort =paste("conda run -n py39 samtools sort ",List_target_path,"/Reads_to_demultiplex.bam.featureCounts.bam -o ",List_target_path,"/Assigned_sorted.bam",sep = "")
  system(command_sort)
  
- command_index =paste("samtools index ",List_target_path,"/Assigned_sorted.bam",sep = "")
+ command_index =paste("conda run -n py39 samtools index ",List_target_path,"/Assigned_sorted.bam",sep = "")
  system(command_index)
  
  #Final command : Umi-tools command
@@ -118,7 +118,7 @@ for (path_temp in List_target_path) {
  #Adding UMI_tools to the environment
  
 
- command_umi_tools = paste("umi_tools count --per-gene --gene-tag=XT --assigned-status-tag=XS --per-cell -I ",
+ command_umi_tools = paste("conda run -n py39 umi_tools count --per-gene --gene-tag=XT --assigned-status-tag=XS --per-cell -I ",
                            List_target_path,"/Assigned_sorted.bam  -S ",List_target_path, "/Expression_table.tsv  --wide-format-cell-counts",sep="")
 
   suppressMessages(system(command_umi_tools))
