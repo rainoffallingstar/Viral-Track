@@ -118,7 +118,7 @@ for (path_temp in List_target_path) {
  #Adding UMI_tools to the environment
  
 
- command_umi_tools = paste("source /public3/home/scg9946/miniconda3/etc/profile.d/conda.sh &&  conda activate py39 && conda run umi_tools count --per-gene --gene-tag=XT --assigned-status-tag=XS --per-cell -I ",
+ command_umi_tools = paste("source /public3/home/scg9946/miniconda3/etc/profile.d/conda.sh &&  conda activate py39 && conda run -n py39 umi_tools count --per-gene --gene-tag=XT --assigned-status-tag=XS --per-cell -I ",
                            List_target_path,"/Assigned_sorted.bam  -S ",List_target_path, "/Expression_table.tsv  --wide-format-cell-counts",sep="")
 
   suppressMessages(system(command_umi_tools))

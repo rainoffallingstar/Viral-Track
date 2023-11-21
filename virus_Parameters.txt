@@ -1,6 +1,6 @@
 N_thread=32
 Output_directory="virus_output"
-Index_genome="/public3/home/scg9946/referG/annotation_index_virusite"
+Index_genome="/public3/home/scg9946/refergenomic_test/virusgenomic"
 Viral_annotation_file="Virusite_annotation_file.txt"
 Name_run="CRCwithVirus"
 Load_STAR_module=FALSE
