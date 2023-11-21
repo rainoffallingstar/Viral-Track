@@ -84,7 +84,7 @@ for (k in Identified_viral_fragments) {
     name_target = gsub("/","",name_target)
     
     #Creating a large samtools command 
-    samtools_extraction_command = paste("conda activate py39 && conda run samtools view -b ",i,name_target,"_Aligned.sortedByCoord.out.bam "
+    samtools_extraction_command = paste("source /public3/home/scg9946/miniconda3/etc/profile.d/conda.sh &&  conda activate py39 && conda run samtools view -b ",i,name_target,"_Aligned.sortedByCoord.out.bam "
                                         ,"\'",k,"\'"," > \'",temp_path,name_target,".bam\'",sep = "")
     system(samtools_extraction_command)
     
@@ -99,14 +99,14 @@ cat("Merging the BAM files from different runs...")
 for (k in Identified_viral_fragments) {
   temp_path = paste(Path_run_directory,k,"/",sep = "")
   
-  samtools_merging_command = paste("conda activate py39 && conda run samtools merge",paste(temp_path,k,"_merge.bam",sep = ""),
+  samtools_merging_command = paste("source /public3/home/scg9946/miniconda3/etc/profile.d/conda.sh &&  conda activate py39 && conda run samtools merge",paste(temp_path,k,"_merge.bam",sep = ""),
                                    paste(temp_path,"*",sep = ""))
   
   l = list.files(temp_path,full.names = T)
   l = paste("\'",l,"\'",sep="")
   l = paste(l,collapse = " ")
   
-  samtools_merging_command = paste("conda activate py39 && conda run samtools merge \'",temp_path,k,"_merge.bam\' ",l,sep = "")
+  samtools_merging_command = paste("source /public3/home/scg9946/miniconda3/etc/profile.d/conda.sh &&  conda activate py39 && conda run samtools merge \'",temp_path,k,"_merge.bam\' ",l,sep = "")
   
   system(samtools_merging_command)
   
@@ -122,7 +122,7 @@ cat("Performing StringTie transcriptome assembly...")
 for (k in Identified_viral_fragments) {
   temp_path = paste(Path_run_directory,k,"/",sep = "")
 
-  stringtie_command = paste("conda activate py39 && conda run stringtie ","\'",temp_path,k,"_merge.bam\'"," -f 0.01 -g 5 ",
+  stringtie_command = paste("source /public3/home/scg9946/miniconda3/etc/profile.d/conda.sh &&  conda activate py39 && conda run stringtie ","\'",temp_path,k,"_merge.bam\'"," -f 0.01 -g 5 ",
                             "-o ","\'",temp_path,k,"_annotation.gtf\' "," -l \'",k,"\'",sep = "")
   
   system(stringtie_command)

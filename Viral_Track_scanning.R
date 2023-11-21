@@ -226,7 +226,7 @@ for (k in List_target_path) {
   name_prefix = paste(temp_output_dir,name_target,"_",sep = "")
   
   #We construct a complex command 
-  STAR_mapping_command = paste("conda activate py39 && conda run STAR --runThreadN",N_thread,"--genomeDir",Index_genome,"--readFilesIn",k,"--outSAMattributes NH HI AS nM NM XS ",
+  STAR_mapping_command = paste("source /public3/home/scg9946/miniconda3/etc/profile.d/conda.sh &&  conda activate py39 && conda run STAR --runThreadN",N_thread,"--genomeDir",Index_genome,"--readFilesIn",k,"--outSAMattributes NH HI AS nM NM XS ",
                                "--outFileNamePrefix",name_prefix,"--outSAMtype BAM SortedByCoordinate","--twopassMode Basic ",
                                "--outFilterMatchNmin 35 --outFilterScoreMinOverLread 0.6 --outFilterMatchNminOverLread 0.6")
   
@@ -262,7 +262,7 @@ for (k in List_output_path) {
   temp_sorted_bam = list.files(k,full.names = T,pattern = "Aligned.sortedByCoord.out.bam")[1]
   
   #To begin with : the ordered .BAM file need to indexed
-  SAMtools_indexing_command = paste("conda activate py39 && conda run samtools index",temp_sorted_bam)
+  SAMtools_indexing_command = paste("source /public3/home/scg9946/miniconda3/etc/profile.d/conda.sh &&  conda activate py39 && conda run samtools index",temp_sorted_bam)
   
   system(SAMtools_indexing_command)
   cat(paste("Indexing of the bam file for",name_target,"is done \n"))
@@ -270,7 +270,7 @@ for (k in List_output_path) {
   #Then we need to compute the number of mapped reads for each chromosome/virus
   temp_chromosome_count_path = paste(k,"/Count_chromosomes.txt",sep = "")
   
-  SAMtools_chromosome_count_command = paste("conda activate py39 && conda run samtools idxstats",temp_sorted_bam,">",temp_chromosome_count_path)
+  SAMtools_chromosome_count_command = paste("source /public3/home/scg9946/miniconda3/etc/profile.d/conda.sh &&  conda activate py39 && conda run samtools idxstats",temp_sorted_bam,">",temp_chromosome_count_path)
   system(SAMtools_chromosome_count_command)
   cat(paste("Computing stat file for the bam file for",name_target,"is done \n"))
   
@@ -320,8 +320,8 @@ for (k in List_output_path) {
       Sys.setenv(PATH = paste("/opt/ohpc/pub/libs/samtools/1.4/bin/", Sys.getenv("PATH"), sep = ":"))
     }
     
-    temp_export_bam_command = paste("conda activate py39 && conda run samtools view -b",temp_sorted_bam,i,">",paste(k,"Viral_BAM_files/",i,".bam ",sep = ""))
-    temp_export_bam_command = paste("conda activate py39 && conda run samtools view -b ",temp_sorted_bam," \'",i,"\'"," > \'",k,"Viral_BAM_files/",i,".bam\'",sep = "")
+    temp_export_bam_command = paste("source /public3/home/scg9946/miniconda3/etc/profile.d/conda.sh &&  conda activate py39 && conda run samtools view -b",temp_sorted_bam,i,">",paste(k,"Viral_BAM_files/",i,".bam ",sep = ""))
+    temp_export_bam_command = paste("source /public3/home/scg9946/miniconda3/etc/profile.d/conda.sh &&  conda activate py39 && conda run samtools view -b ",temp_sorted_bam," \'",i,"\'"," > \'",k,"Viral_BAM_files/",i,".bam\'",sep = "")
     
     
     system(temp_export_bam_command)
@@ -561,7 +561,7 @@ for (k in List_output_path) {
   list_BAM_files = list_BAM_files[rownames(Filtered_QC)]
   list_BAM_files = paste("\'",list_BAM_files,"\'",sep = "")
   
-  Merging_BAM_commad = paste("conda activate py39 && conda run samtools merge",paste(k,"Merged_viral_mapping.bam",sep = ""),list_BAM_files)
+  Merging_BAM_commad = paste("source /public3/home/scg9946/miniconda3/etc/profile.d/conda.sh &&  conda activate py39 && conda run samtools merge",paste(k,"Merged_viral_mapping.bam",sep = ""),list_BAM_files)
   system(Merging_BAM_commad)
   cat("Viral detection step done !")
   
