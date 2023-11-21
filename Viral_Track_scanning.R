@@ -226,7 +226,7 @@ for (k in List_target_path) {
   name_prefix = paste(temp_output_dir,name_target,"_",sep = "")
   
   #We construct a complex command 
-  STAR_mapping_command = paste("source /public3/home/scg9946/miniconda3/etc/profile.d/conda.sh &&  conda activate py39 && conda run STAR --runThreadN",N_thread,"--genomeDir",Index_genome,"--readFilesIn",k,"--outSAMattributes NH HI AS nM NM XS ",
+  STAR_mapping_command = paste("source /public3/home/scg9946/miniconda3/etc/profile.d/conda.sh &&  conda activate py39 && conda run STAR --chimOutJunctionFormat 1 --runThreadN",N_thread,"--genomeDir",Index_genome,"--readFilesIn",k,"--outSAMattributes NH HI AS nM NM XS ",
                                "--outFileNamePrefix",name_prefix,"--outSAMtype BAM SortedByCoordinate","--twopassMode Basic ",
                                "--outFilterMatchNmin 35 --outFilterScoreMinOverLread 0.6 --outFilterMatchNminOverLread 0.6")
   
