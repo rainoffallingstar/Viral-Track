@@ -220,7 +220,7 @@ for (k in List_target_path) {
   
   temp_output_dir = paste(Output_directory,"/",name_target,"/",sep = "")
   List_output_path = c(List_output_path,temp_output_dir)
-  dir.create(temp_output_dir)
+  fs::dir_create(temp_output_dir)
   cat(paste("Mapping ",name_target,".fastq file \n",sep = ""))
   
   name_prefix = paste(temp_output_dir,name_target,"_",sep = "")
@@ -237,9 +237,13 @@ for (k in List_target_path) {
     STAR_mapping_command = paste(STAR_mapping_command, " --readFilesCommand zcat") #Allowing to read .gz files
     
   }
-  
-  
-  system(STAR_mapping_command) ##We launch it....
+  files_out <- list.files(temp_output_dir)
+  if (length(files_out) == 0){
+    message("No previously output detected ")
+    system(STAR_mapping_command) ##We launch it....
+  } else {
+    message("Previously output detected ")
+  }
   cat(paste("Mapping of",name_target,".fastq done ! \n",sep = ""))
   
 }
@@ -281,7 +285,7 @@ for (k in List_output_path) {
   
   ##Let's filter this table : removing host/human sequences and viruses with less than a given threshold of reads
   
-  Chromosome_to_remove = c("X","Y","MT",as.character(1:23))
+  #Chromosome_to_remove = c("X","Y","MT",as.character(1:23))
   Chromosome_to_remove = c("1","10","11","12","13","14","15","16","17","18","19","2","20","21","22","3","4","5","6","7","8","9","MT","X","Y","
                           KI270728.1","KI270727.1","KI270442.1","KI270729.1","GL000225.1","KI270743.1","GL000008.2","GL000009.2,
                           KI270747.1","KI270722.1","GL000194.1","KI270742.1","GL000205.2","GL000195.1","KI270736.1","KI270733.1","
@@ -303,7 +307,9 @@ for (k in List_output_path) {
                           KI270391.1","KI270305.1","KI270373.1","KI270422.1","KI270316.1","KI270340.1","KI270338.1","KI270583.1,
                           KI270334.1","KI270429.1","KI270393.1","KI270516.1","KI270389.1","KI270466.1","KI270388.1","KI270544.1,
                           KI270310.1","KI270412.1","KI270395.1","KI270376.1","KI270337.1","KI270335.1","KI270378.1","KI270379.1,
-                        KI270329.1","KI270419.1","KI270336.1","KI270312.1","KI270539.1","KI270385.1","KI270423.1","KI270392.1","KI270394.1")
+                        KI270329.1","KI270419.1","KI270336.1","KI270312.1","KI270539.1","KI270385.1","KI270423.1","KI270392.1",
+                           "GL000009.2","KI270394.1","GL000224.1","KI270438.1","KI270707.1","KI270717.1","KI270726.1","KI270728.1",
+                           "KI270730.1","KI270734.1","KI270735.1","KI270747.1")
   
   temp_chromosome_count = temp_chromosome_count[!rownames(temp_chromosome_count)%in%Chromosome_to_remove,] ##All viral "chromosome start with a "NC"
   temp_chromosome_count = temp_chromosome_count[temp_chromosome_count$Mapped_reads>Minimal_read_mapped,]
@@ -312,33 +318,34 @@ for (k in List_output_path) {
   
   cat("Checking the mapping quality of each virus... \n")
   #We first create a sub-directory to export the sam files corresponding to each virus
-  dir.create(paste(k,"Viral_BAM_files",sep = "")) 
-  
-  #We then create one SAM file for each virus 
+  fs::dir_create(paste(k,"Viral_BAM_files",sep = "")) 
   
   # try fix name bugs 
-  
   chr_rownames <- rownames(temp_chromosome_count)
   for (i in 1:length(chr_rownames)){
     chr_rownames[i] <- stringr::str_replace_all(chr_rownames[i],"\\|","_")
   }
-  rownames(temp_chromosome_count) <- chr_rownames
-  foreach(i=chr_rownames) %dopar% {
-    if (Load_samtools_module) {
-      Sys.setenv(PATH = paste("/opt/ohpc/pub/libs/samtools/1.4/bin/", Sys.getenv("PATH"), sep = ":"))
+  
+  if (length(list.files(paste(k,"Viral_BAM_files",sep = ""))) == 0 ){
+    #We then create one SAM file for each virus 
+    
+    #rownames(temp_chromosome_count) <- chr_rownames
+    foreach(i= c(1:nrow(temp_chromosome_count))) %dopar% {
+      if (Load_samtools_module) {
+        Sys.setenv(PATH = paste("/opt/ohpc/pub/libs/samtools/1.4/bin/", Sys.getenv("PATH"), sep = ":"))
+      }
+      
+      #temp_export_bam_command = paste("source /public3/home/scg9946/miniconda3/etc/profile.d/conda.sh &&  conda activate py39 && conda run samtools view -b",temp_sorted_bam,i,">",paste(k,"Viral_BAM_files/",i,".bam ",sep = ""))
+      temp_export_bam_command = glue::glue("source /public3/home/scg9946/miniconda3/etc/profile.d/conda.sh &&  conda activate py39 && conda run samtools view -b {temp_sorted_bam} '{rownames(temp_chromosome_count)[i]}' > {k}Viral_BAM_files/{chr_rownames[i]}.bam")
+      
+      # Warning:: something went wrong in this process
+      system(temp_export_bam_command)
+      #cat(paste(rownames(temp_chromosome_count),"\n"))
     }
+    cat("Export of the viral SAM file done for",name_target,"\n")
     
-    temp_export_bam_command = paste("source /public3/home/scg9946/miniconda3/etc/profile.d/conda.sh &&  conda activate py39 && conda run samtools view -b",temp_sorted_bam,i,">",paste(k,"Viral_BAM_files/",i,".bam ",sep = ""))
-    temp_export_bam_command = paste("source /public3/home/scg9946/miniconda3/etc/profile.d/conda.sh &&  conda activate py39 && conda run samtools view -b ",temp_sorted_bam," \'",i,"\'"," > \'",k,"Viral_BAM_files/",i,".bam\'",sep = "")
-    
-    
-    system(temp_export_bam_command)
-    #cat(paste(rownames(temp_chromosome_count),"\n"))
+    #We then load them one by one and genereate a QC report 
   }
-  cat("Export of the viral SAM file done for",name_target,"\n")
-  
-  #We then load them one by one and genereate a QC report 
-  
   
   QC_result = foreach(i=chr_rownames,.combine = rbind,.packages = c("GenomicAlignments","ShortRead")) %dopar% {
     BAM_file= readGAlignments(paste(k,"Viral_BAM_files/",i,".bam",sep = ""),param = ScanBamParam(what =scanBamWhat()))
