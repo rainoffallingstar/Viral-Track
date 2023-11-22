@@ -1,5 +1,5 @@
 N_thread=32
-Output_directory="germ_output"
+Output_directory="/public3/home/scg9946/Viral-Track/germ_output"
 Index_genome="/public3/home/scg9946/referG/HMP_bac_STAR_index"
 Viral_annotation_file="/public3/home/scg9946/referG/all_contig_anno.txt"
 Name_run="CRCwithGerm"

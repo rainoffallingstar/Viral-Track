@@ -262,7 +262,8 @@ for (k in List_output_path) {
   temp_sorted_bam = list.files(k,full.names = T,pattern = "Aligned.sortedByCoord.out.bam")[1]
   
   #To begin with : the ordered .BAM file need to indexed
-  SAMtools_indexing_command = paste("source /public3/home/scg9946/miniconda3/etc/profile.d/conda.sh &&  conda activate py39 && conda run samtools index",temp_sorted_bam)
+  SAMtools_indexing_command = paste("source /public3/home/scg9946/miniconda3/etc/profile.d/conda.sh &&  conda activate py39 && conda run samtools index",
+                                    temp_sorted_bam)
   
   system(SAMtools_indexing_command)
   cat(paste("Indexing of the bam file for",name_target,"is done \n"))
@@ -315,7 +316,14 @@ for (k in List_output_path) {
   
   #We then create one SAM file for each virus 
   
-  foreach(i=rownames(temp_chromosome_count)) %dopar% {
+  # try fix name bugs 
+  
+  chr_rownames <- rownames(temp_chromosome_count)
+  for (i in 1:length(chr_rownames)){
+    chr_rownames[i] <- stringr::str_replace_all(chr_rownames[i],"\\|","_")
+  }
+  rownames(temp_chromosome_count) <- chr_rownames
+  foreach(i=chr_rownames) %dopar% {
     if (Load_samtools_module) {
       Sys.setenv(PATH = paste("/opt/ohpc/pub/libs/samtools/1.4/bin/", Sys.getenv("PATH"), sep = ":"))
     }
@@ -332,7 +340,7 @@ for (k in List_output_path) {
   #We then load them one by one and genereate a QC report 
   
   
-  QC_result = foreach(i=rownames(temp_chromosome_count),.combine = rbind,.packages = c("GenomicAlignments","ShortRead")) %dopar% {
+  QC_result = foreach(i=chr_rownames,.combine = rbind,.packages = c("GenomicAlignments","ShortRead")) %dopar% {
     BAM_file= readGAlignments(paste(k,"Viral_BAM_files/",i,".bam",sep = ""),param = ScanBamParam(what =scanBamWhat()))
     #Let's check the diversity of the reads
     Viral_reads = unique(BAM_file@elementMetadata$seq)
