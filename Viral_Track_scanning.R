@@ -269,7 +269,10 @@ for (k in List_output_path) {
   SAMtools_indexing_command = paste("source /public3/home/scg9946/miniconda3/etc/profile.d/conda.sh &&  conda activate py39 && conda run samtools index",
                                     temp_sorted_bam)
   
-  system(SAMtools_indexing_command)
+  temp_sorted_bai <- stringr::str_replace(temp_sorted_bam,".out.bam",".out.bam.bai")
+  if (file.exists(temp_sorted_bai) == FALSE){
+    system(SAMtools_indexing_command)
+  }
   cat(paste("Indexing of the bam file for",name_target,"is done \n"))
   
   #Then we need to compute the number of mapped reads for each chromosome/virus
@@ -280,8 +283,11 @@ for (k in List_output_path) {
   cat(paste("Computing stat file for the bam file for",name_target,"is done \n"))
   
   #We load it and clean it to remove non mapped viruses
-  temp_chromosome_count = read.table(temp_chromosome_count_path,header = F,row.names = 1)
-  colnames(temp_chromosome_count) = c("Chromosome_length","Mapped_reads","Unknown")
+  library(dplyr)
+  library(readr)
+  temp_chromosome_count <- read_table("Count_chromosomes.txt", 
+                           col_names = FALSE) 
+  colnames(temp_chromosome_count) <- c("chr","Chromosome_length","Mapped_reads","Unknown")
   
   ##Let's filter this table : removing host/human sequences and viruses with less than a given threshold of reads
   
@@ -311,8 +317,10 @@ for (k in List_output_path) {
                            "GL000009.2","KI270394.1","GL000224.1","KI270438.1","KI270707.1","KI270717.1","KI270726.1","KI270728.1",
                            "KI270730.1","KI270734.1","KI270735.1","KI270747.1")
   
-  temp_chromosome_count = temp_chromosome_count[!rownames(temp_chromosome_count)%in%Chromosome_to_remove,] ##All viral "chromosome start with a "NC"
-  temp_chromosome_count = temp_chromosome_count[temp_chromosome_count$Mapped_reads>Minimal_read_mapped,]
+  temp_chromosome_count <- temp_chromosome_count %>% 
+    dplyr::filter(!(chr %in% Chromosome_to_remove)) %>% 
+    dplyr::filter(Mapped_reads >= Minimal_read_mapped)
+  rownames(temp_chromosome_count) <- temp_chromosome_count$chr
   
   ##We now need to check the quality of the mapping for each virus
   
@@ -328,7 +336,6 @@ for (k in List_output_path) {
   
   if (length(list.files(paste(k,"Viral_BAM_files",sep = ""))) == 0 ){
     #We then create one SAM file for each virus 
-    
     #rownames(temp_chromosome_count) <- chr_rownames
     foreach(i= c(1:nrow(temp_chromosome_count))) %dopar% {
       if (Load_samtools_module) {
@@ -347,6 +354,8 @@ for (k in List_output_path) {
     #We then load them one by one and genereate a QC report 
   }
   
+  message("calculating QC_result")
+  
   QC_result = foreach(i=chr_rownames,.combine = rbind,.packages = c("GenomicAlignments","ShortRead")) %dopar% {
     BAM_file= readGAlignments(paste(k,"Viral_BAM_files/",i,".bam",sep = ""),param = ScanBamParam(what =scanBamWhat()))
     #Let's check the diversity of the reads
@@ -354,7 +363,7 @@ for (k in List_output_path) {
     Viral_reads_contents = alphabetFrequency(Viral_reads,as.prob =T )
     Viral_reads_contents = Viral_reads_contents[,c("A","C","G","T")]
     
-    if (class(Viral_reads_contents)=="numeric") {
+    if (class(Viral_reads_contents)[1] =="numeric") {
       Viral_reads_contents = matrix(Viral_reads_contents_mean,ncol = 4)
     }
     
