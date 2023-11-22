@@ -363,7 +363,7 @@ for (k in List_output_path) {
     Viral_reads_contents = alphabetFrequency(Viral_reads,as.prob =T )
     Viral_reads_contents = Viral_reads_contents[,c("A","C","G","T")]
     
-    if (class(Viral_reads_contents)[1] =="numeric") {
+    if ("numeric" %in% class(Viral_reads_contents)) {
       Viral_reads_contents = matrix(Viral_reads_contents_mean,ncol = 4)
     }
     
