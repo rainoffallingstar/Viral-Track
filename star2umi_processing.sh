@@ -24,6 +24,7 @@ zcat crcsinglecell_R1.fastq.gz | head -n2
 umi_tools whitelist --stdin crcsinglecell_R1.fastq.gz --bc-pattern=CCCCCCCCCCCCCCCCNNNNNNNNNN --log2stderr > whitelist.txt
                      
 # step 3
+# by using .fastq as output to avoid O/I bottleneck
 
 umi_tools extract --bc-pattern=CCCCCCCCCCCCCCCCNNNNNNNNNN \
                   --stdin crcsinglecell_R1.fastq.gz \
@@ -31,21 +32,6 @@ umi_tools extract --bc-pattern=CCCCCCCCCCCCCCCCNNNNNNNNNN \
                   --read2-in crcsinglecell_R2.fastq.gz \
                   --read2-out=crcsinglecell_R2_extracted.fastq \
                   --whitelist=whitelist.txt 
-                     
-                     
-# viral track processing
-
-# in virus mod
-
-Rscript Viral_Track_scanning.R virus_Parameter.txt Files_to_process.txt
-Rscript Viral_Track_transcript_assembly.R virus_Parameter.txt Files_to_process.txt
-Rscript Viral_Track_cell_demultiplexing.R virus_Parameter.txt Files_to_process.txt
-
-# in germ mod 
-
-Rscript Viral_Track_scanning.R germ_Parameter.txt Files_to_process.txt
-Rscript Viral_Track_transcript_assembly.R germ_Parameter.txt Files_to_process.txt
-Rscript Viral_Track_cell_demultiplexing.R germ_Parameter.txt Files_to_process.txt
 
 
 
