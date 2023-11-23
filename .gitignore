@@ -4,5 +4,4 @@
 .Ruserdata
 *.bam
 *.fastq.gz
-germ_output/
-virus_output/
+
