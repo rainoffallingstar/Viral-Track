@@ -21,8 +21,11 @@ cat /public3/home/scg5695/project/15_scCRC/multi/Fastq/mRNA/*_R2_001.fastq.gz > 
 # about bc-pattern
 zcat crcsinglecell_R1.fastq.gz | head -n2
 
-umi_tools whitelist --stdin crcsinglecell_R1.fastq.gz --bc-pattern=CCCCCCCCCCCCCCCCNNNNNNNNNN --log2stderr > whitelist.txt
-                     
+umi_tools whitelist --stdin crcsinglecell_R1.fastq.gz --bc-pattern=CCCCCCCCCCCCCCCCNNNNNNNNNN --set-cell-number 443262  --log=whitelist_processed.log --log2stderr > whitelist.txt
+
+
+umi_tools whitelist --stdin crcsinglecell_R1.fastq.gz --bc-pattern=CCCCCCCCCCCCCCCCNNNNNNNNNN --plot-prefix=test  --log=whitelist_processed.log --log2stderr > whitelist.txt
+                   
 # step 3
 # by using .fastq as output to avoid O/I bottleneck
 
@@ -31,6 +34,7 @@ umi_tools extract --bc-pattern=CCCCCCCCCCCCCCCCNNNNNNNNNN \
                   --stdout crcsinglecell_R1_extracted.fastq \
                   --read2-in crcsinglecell_R2.fastq.gz \
                   --read2-out=crcsinglecell_R2_extracted.fastq \
+                  --log=extract_processed.log \
                   --whitelist=whitelist.txt 
 
 
