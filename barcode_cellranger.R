@@ -25,4 +25,17 @@ for (i in 1:nrow(barcode_df)){
   fs::file_copy(barcode_df$path_dir[i],barcode_df$newpath[i])
 }
 
+barcode_list <- list()
+
+for (i in 1:nrow(barcode_df)){
+  barcode_list[[i]] <- read.table(glue::glue("barcodes/{i}.tsv.gz"))
+}
+
+barcodes <- data.table::rbindlist(barcode_list) %>% 
+  as.data.frame() %>% 
+  dplyr::distinct(V1)
+
+barcodes <- purrr::map(barcodes$V1,function(x) stringr::str_remove(x,"-1")) %>% 
+  unlist()
+write_tsv(data.frame(barcodes = barcodes),"barcodes.txt",col_names = FALSE)
 

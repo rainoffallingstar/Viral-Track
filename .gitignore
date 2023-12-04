@@ -4,4 +4,4 @@
 .Ruserdata
 *.bam
 *.fastq.gz
-
+umitools_output/

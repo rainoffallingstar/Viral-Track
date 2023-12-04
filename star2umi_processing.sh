@@ -35,7 +35,7 @@ umi_tools extract --bc-pattern=CCCCCCCCCCCCCCCCNNNNNNNNNN \
                   --read2-in crcsinglecell_R2.fastq.gz \
                   --read2-out=crcsinglecell_R2_extracted.fastq \
                   --log=extract_processed.log \
-                  --whitelist=whitelist.txt 
+                  --whitelist=barcodes.txt 
 
 
 
