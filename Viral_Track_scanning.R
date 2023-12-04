@@ -285,7 +285,7 @@ for (k in List_output_path) {
   #We load it and clean it to remove non mapped viruses
   library(dplyr)
   library(readr)
-  temp_chromosome_count <- read_table("Count_chromosomes.txt", 
+  temp_chromosome_count <- read_table(temp_chromosome_count_path, 
                            col_names = FALSE) 
   colnames(temp_chromosome_count) <- c("chr","Chromosome_length","Mapped_reads","Unknown")
   
