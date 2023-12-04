@@ -1,3 +1,0 @@
-exec > "germ_output/crcsinglecell_R2_extracted/crcsinglecell_R2_extracted__STARtmp/tmp.fifo.read1"
-echo FILE 0
-zcat      "/public3/home/scg9946/crcsinglecell_R2_extracted.fastq.gz"

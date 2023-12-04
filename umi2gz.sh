@@ -3,8 +3,8 @@
 # 设置变量
 input_dir="/public3/home/scg5695/project/15_scCRC/multi/Fastq/mRNA"
 output_dir="/public3/home/scg9946/Viral-Track/umitools_output"
-barcode_file="/public3/home/scg9946/Viral-Track/barcodes.txt"
-sample_list="/public3/home/scg9946/Viral-Track/sample_list.txt"
+barcode_file="/public3/home/scg9946/Viral-Track/barcodes/barcodes.txt"
+sample_list="/public3/home/scg9946/Viral-Track/barcodes/sample_list.txt"
 
 # 循环处理每个样本
 while IFS= read -r sample_list <&3; do
