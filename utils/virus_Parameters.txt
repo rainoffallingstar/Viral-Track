@@ -1,0 +1,11 @@
+N_thread=32
+Output_directory="/public3/home/scg9946/Viral-Track/virus_output"
+Index_genome="/public3/home/scg9946/refergenomic_test/virushg38"
+Viral_annotation_file="/public3/home/scg9946/Viral-Track/Virusite_annotation_file.txt"
+Name_run="CRCwithVirus"
+Load_STAR_module=FALSE
+Load_samtools_module=FALSE
+Load_stringtie_module=FALSE
+Minimal_read_mapped=50
+Single_cell_metadata=""
+
