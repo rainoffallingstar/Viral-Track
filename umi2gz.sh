@@ -19,6 +19,6 @@ while IFS= read -r sample_list <&3; do
             --whitelist="$barcode_file" 
         echo "cleaning"
         echo "正在压缩样本"
-        pigz -p 16 "${output_dir}/${sample_list}_R2_extracted.fastq"
+        pigz -p 32 "${output_dir}/${sample_list}_R2_extracted.fastq"
         
 done  < "$sample_list"
