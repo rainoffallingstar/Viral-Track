@@ -5,3 +5,5 @@
 *.bam
 *.fastq.gz
 umitools_output/
+virusoutput/
+germoutput/
