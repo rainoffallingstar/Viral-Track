@@ -28,7 +28,7 @@ star2map <- function(sampletxt = "/public3/home/scg9946/Viral-Track/barcodes/R2_
     name_prefix = paste0(star2output,fastq_sample)
     message(glue::glue("info::start processing {i}/{nrow(sample_list)} with {fastq_file}"))
     STAR_mapping_command = paste(star_exe,
-                                 " --chimOutJunctionFormat 1 --runThreadN",
+                                 " --runThreadN",
                                  N_thread,"--genomeDir",
                                  Index_genome,
                                  "--readFilesIn",fastq_file,
