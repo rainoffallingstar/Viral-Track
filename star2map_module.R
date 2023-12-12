@@ -16,7 +16,7 @@ star2map <- function(sampletxt = "/public3/home/scg9946/Viral-Track/barcodes/R2_
   fs::dir_create(output_dir)
   message("info::start mapping fastq files")
   for ( i in 1:nrow(sample_list)){
-    fastq_file <- sample_list[i,1]
+    fastq_file <- sample_list[i,1] %>% unlist()
     is_gz_file = grepl(pattern = ".gz",fastq_file)
     fastq_sample <- stringr::str_split(fastq_file,"\\/")
     fastq_sample <- fastq_sample[[1]]
