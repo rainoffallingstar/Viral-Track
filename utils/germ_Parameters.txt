@@ -1,0 +1,11 @@
+N_thread=32
+Output_directory="/public3/home/scg9946/Viral-Track/germ_output"
+Index_genome="/public3/home/scg9946/referG/HMP_bac_STAR_index"
+Viral_annotation_file="/public3/home/scg9946/referG/all_contig_anno.txt"
+Name_run="CRCwithGerm"
+Load_STAR_module=FALSE
+Load_samtools_module=FALSE
+Load_stringtie_module=FALSE
+Minimal_read_mapped=50
+Single_cell_metadata=""
+
