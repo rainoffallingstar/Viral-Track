@@ -13,6 +13,7 @@ readextract4QC <- function(samtools_exe = "source /public3/home/scg9946/minicond
   detectstatus <- list()
   for ( i in 1:length(sampledirs)){
     bamfile <- list.files(sampledirs[i],"Aligned.sortedByCoord.out.bam",full.names = TRUE)
+    bamfile <- bamfile[!grepl(".bam.bai",bamfile)]
     chr_target <- readr::read_csv(glue::glue("{sampledirs[i]}/chr_target.txt"))
     chr_target <- chr_target$chr
     chr_name <- readr::read_csv(glue::glue("{sampledirs[i]}/chr_names.txt"))
