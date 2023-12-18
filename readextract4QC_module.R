@@ -144,7 +144,7 @@ readextract4QC <- function(samtools_exe = "source /public3/home/scg9946/minicond
     
     outbam <- outbam %>% na.omit()
     QC_result = foreach(i=outbam,.combine = rbind,.packages = c("GenomicAlignments","ShortRead")) %dopar% {
-      BAM_file= readGAlignments(paste0(output,"/",i),param = ScanBamParam(what =scanBamWhat()))
+      BAM_file= readGAlignments(i,param = ScanBamParam(what =scanBamWhat()))
       #Let's check the diversity of the reads
       Viral_reads = unique(BAM_file@elementMetadata$seq)
       Viral_reads_contents = alphabetFrequency(Viral_reads,as.prob =T )
