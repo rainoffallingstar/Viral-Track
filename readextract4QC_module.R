@@ -4,6 +4,7 @@ readextract4QC <- function(samtools_exe = "source /public3/home/scg9946/minicond
                            readannotation = "/public3/home/scg9946/Viral-Track/Virusite_annotation_file.txt",
                            readnameFilter = NULL){
   message("info::scanning files")
+  library(dplyr)
   if (dir.exists(root_dir) == FALSE){
     stop("the root dir does not exist ")
   }
