@@ -282,6 +282,6 @@ readextract4QC <- function(samtools_exe = "source /public3/home/scg9946/minicond
 viraldetect <- readextract4QC(samtools_exe = "source /public3/home/scg9946/miniconda3/etc/profile.d/conda.sh && conda run samtools",
                            root_dir = "/public3/home/scg9946/Virus-Track/virusoutput",
                            output_dir = "Viral_BAM_files",
-                           readannotation = "/public3/home/scg9946/Viral-Track/Virusite_annotation_file.txt",
+                           readannotation = "/public3/home/scg9946/Viral-Track/utils/Virusite_annotation_file.txt",
                            readnameFilter = "refseq")
 
