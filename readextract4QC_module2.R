@@ -1,5 +1,5 @@
 readextract4QC <- function(samtools_exe = "source /public3/home/scg9946/miniconda3/etc/profile.d/conda.sh && conda run samtools",
-                           root_dir = "/public3/home/scg9946/Virus-Track/virusoutput",
+                           root_dir = "/public3/home/scg9946/Virus-Track/germoutput",
                            output_dir = "Viral_BAM_files",
                            readannotation = "/public3/home/scg9946/Viral-Track/Virusite_annotation_file.txt",
                            readnameFilter = NULL,
@@ -107,8 +107,6 @@ readextract4QC <- function(samtools_exe = "source /public3/home/scg9946/minicond
   ##Registering the parallel environment
   cl =makeCluster(N_thread)
   registerDoParallel(cl)
-  
-  
   message("info::scanning files")
   library(dplyr)
   if (dir.exists(root_dir) == FALSE){
@@ -117,9 +115,9 @@ readextract4QC <- function(samtools_exe = "source /public3/home/scg9946/minicond
   Virus_database = read.delim(readannotation,header=T,sep="\t")
   sampledirs <-  fs::dir_ls(root_dir)
   detectstatus <- list()
-
-  
   for ( i in 1:length(sampledirs)){
+    dirid <- sampledirs[i]
+    setwd(dirid)
     if (file.exists(glue::glue("{sampledirs[i]}/QCend.txt"))){
       next
     } else {
@@ -127,9 +125,10 @@ readextract4QC <- function(samtools_exe = "source /public3/home/scg9946/minicond
     bamfile <- bamfile[!grepl(".bam.bai",bamfile)]
     chr_target <- readr::read_csv(glue::glue("{sampledirs[i]}/chr_target.txt"))
     chr_target <- chr_target$chr
-    message(glue::glue("info:: processing {i}/{length(sampledirs)} samples"))
+    message(glue::glue("info:: processing {i}/{length(sampledirs)} samples,working with {sampledirs[i]}"))
     if (!is.null(readnameFilter)){
-      chr_target <- chr_target[grepl(readnameFilter,chr_target)]
+      chr_target <- chr_target[!grepl("chr",chr_target)]
+      chr_target <- chr_target[!grepl("NA/",chr_target)]
     }
     output <- glue::glue("{sampledirs[i]}/{output_dir}")
     outbam <- rep(NA,length(chr_target))
@@ -140,7 +139,7 @@ readextract4QC <- function(samtools_exe = "source /public3/home/scg9946/minicond
     
     message("calculating QC_result")
     
-    outbam <- outbam %>% na.omit()
+    print(outbam[1:6])
     QC_result = foreach(i=outbam,.combine = rbind,.packages = c("GenomicAlignments","ShortRead")) %dopar% {
       BAM_file= readGAlignments(i,param = ScanBamParam(what =scanBamWhat()))
       #Let's check the diversity of the reads
@@ -202,8 +201,9 @@ readextract4QC <- function(samtools_exe = "source /public3/home/scg9946/minicond
     QC_result = as.data.frame(QC_result)
     QC_result = QC_result[QC_result$N_unique_reads>0,]
     message(paste("Exporting QC ",sampledirs[i],"...."))
-    logfile <- list.files(sampledirs[i],"Log.final.out")
-    path_to_Log_file = paste(sampledirs[i],"/",logfile,sep = "")
+    logfile <- list.files(getwd(),"Log.final.out")
+    print(logfile)
+    path_to_Log_file = paste(getwd(),"/",logfile,sep = "")
     Mapping_information = Extraction_Log_final(path_to_Log_file)
     Mean_mapping_length = Mapping_information$Length_vector[1]
     
@@ -217,16 +217,16 @@ readextract4QC <- function(samtools_exe = "source /public3/home/scg9946/minicond
       cat(paste(length(detected_virus)," viral sequences detected detected \n",sep = ""))
     }
     
-    cat(paste("Exporting QC table for ",sampledirs[i],"...."))
+    cat(paste("Exporting QC table for ",dirid,"...."))
     
     #Removing low quality virus
     
     Filtered_QC=QC_result[detected_virus,]
     
     ##Exporting the tables of the QC analysis
-    write.table(file = paste(sampledirs[i],"/","QC_unfiltered.txt",sep = ""),
+    write.table(file = paste(dirid,"/","QC_unfiltered.txt",sep = ""),
                 x = QC_result,quote = F,sep = "\t")
-    write.table(file = paste(sampledirs[i],"/","QC_filtered.txt",sep = ""),
+    write.table(file = paste(dirid,"/","QC_filtered.txt",sep = ""),
                 x = Filtered_QC,quote = F,sep = "\t")
     cat(" done !")
     
@@ -234,7 +234,7 @@ readextract4QC <- function(samtools_exe = "source /public3/home/scg9946/minicond
     
     ##But also on the splicing events identified by STAR....
     
-    Splice_table_path = list.files(sampledirs[i],
+    Splice_table_path = list.files(dirid,
                                    pattern = "SJ.out.tab",full.names = T)
     Splice_table = read.table(Splice_table_path,header = F,sep = "\t")
     Splice_table = Splice_table[as.character(Splice_table$V1)%in%detected_virus,]
@@ -249,7 +249,7 @@ readextract4QC <- function(samtools_exe = "source /public3/home/scg9946/minicond
     Splice_table$Annotated = factor(Splice_table$Annotated,levels = c("GT/AG","CT/AC","GC/AG","CT/GC","AT/AC","GT/AT","Non-canonical"))
     
     ###Additional info : % of reads mapped to viral vs host
-    temp_chromosome_count_path <- paste0(sampledirs[i],"/Count_chromosomes.txt")
+    temp_chromosome_count_path <- paste0(dirid,"/Count_chromosomes.txt")
     Read_count_temp = read.table(temp_chromosome_count_path,header = F,row.names = 1)
     colnames(Read_count_temp) = c("Chromosome_length","Mapped_reads","Unknown")
     Read_count_temp = Read_count_temp[Read_count_temp$Mapped_reads!=0,]
@@ -267,18 +267,18 @@ readextract4QC <- function(samtools_exe = "source /public3/home/scg9946/minicond
     
     ###Starting to plot the pdf QC
     if (length(detected_virus) > 0) {
-      cat(paste("Creating QC plot for ",sampledirs[i],"...."))
+      cat(paste("Creating QC plot for ",dirid,"...."))
       QClist <- list(
         Mapping_information,
         QC_result,
         Mapping_selected_virus
       )
-      saveRDS(QClist,paste0(sampledirs[i],"/QC_report.RDS"))
+      saveRDS(QClist,paste0(dirid,"/QC_report.RDS"))
     }
     ##Merging all viral sam files corresponding to identified viruses 
     cat("Merging Viral SAM files identified")
     
-    list_BAM_files = paste(sampledirs[i],"/",output_dir,"/",sep="")
+    list_BAM_files = paste(dirid,"/",output_dir,"/",sep="")
     selected_virus = list.files(list_BAM_files,full.names=F)
     selected_virus = base::strsplit(x = selected_virus,split = ".bam")
     selected_virus = unlist(lapply(selected_virus, function(x) {x[1]}))
@@ -288,21 +288,22 @@ readextract4QC <- function(samtools_exe = "source /public3/home/scg9946/minicond
     list_BAM_files = list_BAM_files[rownames(Filtered_QC)]
     list_BAM_files = paste("\'",list_BAM_files,"\'",sep = "")
     print(list_BAM_files)
-    Merging_BAM_commad = paste(samtools_exe, "merge",paste(sampledirs[i],"Merged_viral_mapping.bam",sep = ""),list_BAM_files)
+    Merging_BAM_commad = paste(samtools_exe, "merge",paste(dirid,"Merged_viral_mapping.bam",sep = ""),list_BAM_files)
     if (length(detected_virus) > 0) {
       system(Merging_BAM_commad)
       dffinal <- data.frame(
-        sample = sampledirs[i],
+        sample = dirid,
         status = "detect"
       )
+      
     } else {
       dffinal <- data.frame(
-        sample = sampledirs[i],
+        sample = dirid,
         status = "undetect"
       )
     }
     cat("Viral detection step done !")
-    fs::file_create(glue::glue("{sampledirs[i]}/QCend.txt"))
+    fs::file_create(glue::glue("{dirid}/QCend.txt"))
     detectstatus[[i]] <- dffinal
     }
   }
@@ -310,9 +311,9 @@ readextract4QC <- function(samtools_exe = "source /public3/home/scg9946/minicond
 }
 
 viraldetect <- readextract4QC(samtools_exe = "source /public3/home/scg9946/miniconda3/etc/profile.d/conda.sh && conda run samtools",
-                           root_dir = "/public3/home/scg9946/Virus-Track/virusoutput",
+                           root_dir = "/public3/home/scg9946/Virus-Track/germoutput",
                            output_dir = "Viral_BAM_files",
-                           readannotation = "/public3/home/scg9946/Viral-Track/utils/Virusite_annotation_file.txt",
+                           readannotation = "/public3/home/scg9946/referG/all_contig_anno.txt",
                            readnameFilter = "refseq",
-                           N_thread = 32)
+                           N_thread = 8)
 

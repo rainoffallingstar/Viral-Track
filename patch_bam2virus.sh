@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # 染色体名称和输出文件名的文本文件
-chromosome_file="target_chr.txt"
-output_file="target_chrname.txt"
+chromosome_file="chr_target.txt"
+output_file="chr_names.txt"
 
 # BAM文件路径
 bam_file="/public3/home/scg9946/Viral-Track/virus_output/crcsinglecell_R2_extracted/crcsinglecell_R2_extracted_Aligned.sortedByCoord.out.bam"
