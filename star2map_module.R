@@ -2,7 +2,7 @@
 star2map <- function(sampletxt = "/public3/home/scg9946/Viral-Track/barcodes/R2_extracted.txt",
                      star_exe = "source /public3/home/scg9946/miniconda3/etc/profile.d/conda.sh &&  conda activate py39 && conda run STAR",
                      samtools_exe = "source /public3/home/scg9946/miniconda3/etc/profile.d/conda.sh &&  conda activate py39 && conda run samtools",
-                     output_dir = "/public3/home/scg9946/Virus-Track/virusoutput",
+                     output_dir = "/public3/home/scg9946/Viral-Track/virusoutput",
                      Index_genome = "/public3/home/scg9946/refergenomic_test/virushg38",
                      N_thread = 32
                      ){
